@@ -20,17 +20,6 @@ in {
         extensions = ["nvim-tree"];
       };
     })
-    (mkIf (breadcrumbsCfg.enable && breadcrumbsCfg.source == "nvim-navic") {
-      vim.statusline.lualine.setupOpts = {
-        # TODO: rewrite in new syntax
-        winbar.lualine_c = mkDefault [
-          [
-            "navic"
-            (mkLuaInline "draw_empty = ${boolToString config.vim.ui.breadcrumbs.alwaysRender}")
-          ]
-        ];
-      };
-    })
     (mkIf cfg.enable {
       vim = {
         startPlugins = ["lualine"];
