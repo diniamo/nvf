@@ -7,11 +7,10 @@ inputs: {
   extraModules ? [],
 }: let
   inherit (pkgs) vimPlugins;
-  inherit (pkgs.vimUtils) buildVimPlugin;
   inherit (lib.strings) isString toString;
   inherit (lib.lists) filter map concatLists;
   inherit (lib.attrsets) recursiveUpdate getAttr;
-  inherit (lib.asserts) assertMsg;
+  inherit (builtins) baseNameOf;
 
   # import modules.nix with `check`, `pkgs` and `lib` as arguments
   # check can be disabled while calling this file is called
@@ -37,8 +36,16 @@ inputs: {
     src = getAttr ("plugin-" + pname) inputs;
   in
     pkgs.stdenvNoCC.mkDerivation ({
-        inherit src;
         version = src.shortRev or src.shortDirtyRev or "dirty";
+
+        inherit src;
+
+        buildPhase = lib.optionalString vimOptions.byteCompileLua ''
+          runHook preBuild
+          find . -type f -name '*.lua' -exec luajit -bd -- {} {} \;
+          runHook postBuild
+        '';
+
         installPhase = ''
           runHook preInstall
 
@@ -49,15 +56,6 @@ inputs: {
         '';
       }
       // attrs);
-
-  noBuildPlug = {pname, ...} @ attrs: let
-    input = getAttr ("plugin-" + pname) inputs;
-  in
-    {
-      version = input.shortRev or input.shortDirtyRev or "dirty";
-      outPath = getAttr ("plugin-" + pname) inputs;
-    }
-    // attrs;
 
   buildTreesitterPlug = grammars: vimPlugins.nvim-treesitter.withPlugins (_: grammars);
 
@@ -78,7 +76,7 @@ inputs: {
                 patches = [../patches/flutter-tools.patch];
               }
             )
-          else noBuildPlug {pname = plug;}
+          else buildPlug {pname = plug;}
         )
       else plug
     ))
@@ -100,6 +98,16 @@ inputs: {
   extraLuaPackages = ps: map (x: ps.${x}) vimOptions.luaPackages;
   extraPython3Packages = ps: map (x: ps.${x}) vimOptions.python3Packages;
 
+  luaConfig =
+    if vimOptions.byteCompileLua
+    then pkgs.runCommandLocal "init.lua" {text = vimOptions.builtLuaConfigRC;} "${pkgs.luajit}/bin/luajit -bd -- - $out <<< \"$text\""
+    else pkgs.writeText "init.lua" vimOptions.builtLuaConfigRC;
+
+  extraLuaFiles =
+    if vimOptions.byteCompileLua
+    then map (file: pkgs.runCommandLocal (baseNameOf file) {} "${pkgs.luajit}/bin/luajit -bd -- ${file} $out") vimOptions.extraLuaFiles
+    else vimOptions.extraLuaFiles;
+
   # Wrap the user's desired (unwrapped) Neovim package with arguments that'll be used to
   # generate a wrapped Neovim package.
   neovim-wrapped = inputs.mnw.lib.wrap pkgs {
@@ -107,8 +115,9 @@ inputs: {
     plugins = concatLists [builtStartPlugins builtOptPlugins];
     appName = "nvf";
     extraBinPath = vimOptions.extraPackages;
-    initLua = vimOptions.builtLuaConfigRC;
-    luaFiles = vimOptions.extraLuaFiles;
+    # initLua = vimOptions.builtLuaConfigRC;
+    # luaFiles = vimOptions.extraLuaFiles;
+    luaFiles = [luaConfig] ++ extraLuaFiles;
 
     inherit (vimOptions) viAlias vimAlias withRuby withNodeJs withPython3;
     inherit extraLuaPackages extraPython3Packages;
@@ -116,13 +125,13 @@ inputs: {
 
   # Additional helper scripts for printing and displaying nvf configuration
   # in your commandline.
-  printConfig = pkgs.writers.writeDashBin "print-nvf-config" ''
+  printConfig = pkgs.writers.writeDashBin "nvf-print-config" ''
     cat << EOF
       ${vimOptions.builtLuaConfigRC}
     EOF
   '';
 
-  printConfigPath = pkgs.writers.writeDashBin "print-nvf-config-path" ''
+  printConfigPath = pkgs.writers.writeDashBin "nvf-print-config-path" ''
     realpath ${pkgs.writeTextFile {
       name = "nvf-init.lua";
       text = vimOptions.builtLuaConfigRC;
