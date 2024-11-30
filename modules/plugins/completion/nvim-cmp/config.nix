@@ -96,7 +96,26 @@ in {
             ${mappings.close} = mkLuaInline "cmp.mapping.abort()";
             ${mappings.scrollDocsUp} = mkLuaInline "cmp.mapping.scroll_docs(-4)";
             ${mappings.scrollDocsDown} = mkLuaInline "cmp.mapping.scroll_docs(4)";
-            ${mappings.confirm} = mkLuaInline "cmp.mapping.confirm({ select = true })";
+
+            ${mappings.confirm} = mkLuaInline ''
+              cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  ${
+                if luasnipEnable
+                then ''
+                  if luasnip.expandable() then
+                    luasnip.expand()
+                  else
+                    cmp.confirm({ select = true })
+                  end
+                ''
+                else "cmp.confirm({ select = true })"
+              }
+                else
+                  fallback()
+                end
+              end)
+            '';
 
             ${mappings.next} = mkLuaInline ''
               cmp.mapping(function(fallback)
@@ -116,7 +135,7 @@ in {
                 else
                   fallback()
                 end
-              end)
+              end, { "i", "s" })
             '';
 
             ${mappings.previous} = mkLuaInline ''
@@ -130,7 +149,7 @@ in {
                 else
                   fallback()
                 end
-              end)
+              end, { "i", "s" })
             '';
           };
         };
