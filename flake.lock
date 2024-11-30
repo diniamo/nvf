@@ -879,11 +879,11 @@
     "plugin-luasnip": {
       "flake": false,
       "locked": {
-        "lastModified": 1730895001,
-        "narHash": "sha256-Vb4unHnhppcM1HZtd8oohJHPlkUHORoYUjKUWyhRM6g=",
+        "lastModified": 1732954807,
+        "narHash": "sha256-Fy5wr31LcNLO5Z2+i4FApC2rLENFzutP05wegUr59Co=",
         "owner": "L3MON4D3",
         "repo": "LuaSnip",
-        "rev": "2737edc9e674e537dc0a97e3405658d57d2d31ed",
+        "rev": "4e584350cacddfccc137e9c828343eeaa4a57899",
         "type": "github"
       },
       "original": {
@@ -1153,11 +1153,11 @@
     "plugin-nvim-cmp": {
       "flake": false,
       "locked": {
-        "lastModified": 1730523275,
-        "narHash": "sha256-iNEoMl/X0nh2sAio1h+dkuobeOXRBXKFJCcElUyyW54=",
+        "lastModified": 1732948484,
+        "narHash": "sha256-+0nflL0WCaxPuJgUviELhbXASNYYl/SKZ+nz70sEAXU=",
         "owner": "hrsh7th",
         "repo": "nvim-cmp",
-        "rev": "f17d9b4394027ff4442b298398dfcaab97e40c4f",
+        "rev": "ca4d3330d386e76967e53b85953c170658255ecb",
         "type": "github"
       },
       "original": {
