@@ -80,7 +80,7 @@
     systems.url = "github:nix-systems/default";
 
     # Alternate neovim-wrapper
-    mnw.url = "github:Gerg-L/mnw";
+    mnw.url = "github:diniamo/mnw/source-order";
 
     # For generating documentation website
     nmd = {
