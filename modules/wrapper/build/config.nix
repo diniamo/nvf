@@ -43,7 +43,7 @@
     nvim-treesitter = buildTreesitterPlug vimOptions.treesitter.grammars;
     flutter-tools-patched = buildPlug {
       pname = "flutter-tools";
-      patches = [../patches/flutter-tools.patch];
+      patches = [../../../patches/flutter-tools.patch];
     };
   };
 
