@@ -1,13 +1,9 @@
-# NixOS module
-{
-  self,
-  lib,
-}: {
+self: {
   config,
   pkgs,
   ...
 }: let
-  inherit (self) inputs packages;
+  inherit (self) lib inputs packages;
   inherit (lib) maintainers;
   inherit (lib.modules) mkIf mkOverride mkAliasOptionModule;
   inherit (lib.lists) optional;
@@ -19,9 +15,7 @@
   nvfModule = submoduleWith {
     description = "Nvf module";
     class = "nvf";
-    specialArgs = {
-      inherit pkgs lib inputs;
-    };
+    specialArgs = { inherit pkgs lib inputs; };
     modules = import ../../modules/modules.nix {inherit pkgs lib;};
   };
 in {

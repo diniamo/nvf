@@ -1,13 +1,9 @@
-# Home Manager module
-{
-  self,
-  lib,
-}: {
+self: {
   config,
   pkgs,
   ...
 }: let
-  inherit (self) packages inputs;
+  inherit (self) lib packages inputs;
   inherit (lib) maintainers;
   inherit (lib.modules) mkIf mkAliasOptionModule;
   inherit (lib.lists) optional;
@@ -19,9 +15,7 @@
   nvfModule = submoduleWith {
     description = "Nvf module";
     class = "nvf";
-    specialArgs = {
-      inherit pkgs lib inputs;
-    };
+    specialArgs = {inherit pkgs lib inputs;};
     modules = import ../../modules/modules.nix {inherit pkgs lib;};
   };
 in {
@@ -93,5 +87,6 @@ in {
         ++ optional cfg.enableManpages packages.${pkgs.stdenv.system}.docs-manpages;
     };
   };
+
   _file = ./home-manager.nix;
 }
